@@ -34,7 +34,6 @@ public class BFSMazeExit {
 
         Point start = new Point(entrance[0], entrance[1], null);
         points.add(start);
-        int steps = 0;
 
         while(!points.isEmpty()){
             Point point = points.poll();
@@ -47,12 +46,6 @@ public class BFSMazeExit {
                 visitedNodes.add(point);
                 continue;
             }
-
-            if(!point.equals(start) ){
-                steps++;
-            }
-
-
 
             if((!point.equals(start))
                     &&(maze[point.x][point.y]=='.')

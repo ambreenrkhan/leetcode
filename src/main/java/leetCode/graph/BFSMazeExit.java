@@ -3,13 +3,15 @@ package leetCode.graph;
 import java.util.*;
 
 public class BFSMazeExit {
-    private class Point{
+    private static class Point{
         int x;
         int y;
+        Point parent;
 
-        public Point(int x, int y){
-         this.x = x;
-         this.y = y;
+        public Point(int x, int y, Point parent){
+            this.x = x;
+            this.y = y;
+            this.parent = parent;
         }
 
         @Override
@@ -27,65 +29,78 @@ public class BFSMazeExit {
     }
 
     public int nearestExit(char[][] maze, int[] entrance) {
-        Queue<Point> points = new LinkedList<>();
+        Queue<Point> points = new ArrayDeque<>();
         Set<Point> visitedNodes = new HashSet<>();
 
-        Point start = new Point(entrance[0],entrance[1]);
+        Point start = new Point(entrance[0], entrance[1], null);
         points.add(start);
-        visitedNodes.add(start);
         int steps = 0;
 
         while(!points.isEmpty()){
             Point point = points.poll();
 
-            System.out.println("CUrrent point " + point.x + "=" + point.y);
+            if(visitedNodes.contains(point) || isInvalid(point, maze)){
+                continue;
+            }
+
+            if(maze[point.x][point.y]=='+'){
+                visitedNodes.add(point);
+                continue;
+            }
+
             if(!point.equals(start) ){
                 steps++;
-          //      System.out.println("CUrrent point " + point.x + "=" + point.y);
-                if(point.x == 0 || point.y == 0 || point.x == maze.length-1 || point.y == maze[0].length-1){
-                    break;
-                }
             }
 
-            Point left = new Point(point.x, point.y-1);
-            Point right = new Point(point.x, point.y+1);
-            Point top = new Point(point.x-1, point.y);
-            Point bottom = new Point(point.x+1, point.y);
 
-            if(top.x>=0 &&  maze[top.x][top.y]=='.' && !visitedNodes.contains(top)){
-                 System.out.println("Adding top " + top.x + "=" + top.y);
 
-                points.add(top);
-            }
-            if(bottom.x<maze.length && maze[bottom.x][bottom.y]=='.' && !visitedNodes.contains(bottom)){
-                System.out.println("Adding bottom " + bottom.x + "=" + bottom.y);
+            if((!point.equals(start))
+                    &&(maze[point.x][point.y]=='.')
+                    && (point.x == 0 || point.y == 0 || point.x == maze.length-1 || point.y == maze[0].length-1)){
 
-                points.add(bottom);
+                return backtrackPath(point);
             }
-            if(left.y>=0 && maze[left.x][left.y]=='.' && !visitedNodes.contains(left)){
-                System.out.println("Adding left " + left.x + "=" + left.y);
-                points.add(left);
-            }
-            if(right.y<maze[0].length && maze[right.x][right.y]=='.' && !visitedNodes.contains(right)){
-                System.out.println("Adding right " + right.x + "=" + right.y);
-                points.add(right);
-            }
-            visitedNodes.add(right);
-            visitedNodes.add(top);
-            visitedNodes.add(left);
-            visitedNodes.add(bottom);
 
+            Point left = new Point(point.x, point.y - 1, point);
+            Point right = new Point(point.x, point.y + 1, point);
+            Point top = new Point(point.x - 1, point.y, point);
+            Point bottom = new Point(point.x + 1, point.y, point);
+
+            points.add(bottom);
+            points.add(right);
+            points.add(top);
+            points.add(left);
+
+            visitedNodes.add(point);
         }
 
-        return steps > 0 ? steps : -1;
+        return -1;
+
+    }
+
+    private int backtrackPath(
+            Point cur) {
+        Point iter = cur;
+        int steps = 0;
+        while (iter != null) {
+            ++steps;
+            iter = iter.parent;
+        }
+
+        return steps > 0 ? steps-1 : -1;
+    }
+
+
+    boolean isInvalid(Point point, char[][] maze){
+        return point.x < 0 || point.y < 0 ||  point.x >= maze.length || point.y >= maze[0].length;
     }
 
     public static void main(String[] args){
-        char[][] maze = {{'.','+','.'}};
-        int [] entrance = {0,2};
-
         BFSMazeExit bme = new BFSMazeExit();
-        System.out.println(bme.nearestExit(maze,entrance));
+
+       char[][] maze = {{'+','+','+'},{'.','.','.','+'},{'+','+','+','.'}};
+       int [] entrance = {1,2};
+       System.out.println(bme.nearestExit(maze,entrance)); // should be -1
+
     }
 }
-
